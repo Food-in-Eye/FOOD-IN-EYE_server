@@ -4,7 +4,7 @@ store_router
 
 from fastapi import APIRouter
 from core.models.store import StoreModel
-from core.common.mongo2 import MongodbController
+from core.common.mongo import MongodbController
 from .src.util import Util
 
 store_router = APIRouter(prefix="/stores")

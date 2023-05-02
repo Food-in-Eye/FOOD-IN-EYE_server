@@ -7,7 +7,7 @@ from datetime import datetime
 
 from fastapi import APIRouter
 from core.models.store import MenuModel
-from core.common.mongo2 import MongodbController
+from core.common.mongo import MongodbController
 from .src.util import Util
 
 menu_router = APIRouter(prefix="/menus")

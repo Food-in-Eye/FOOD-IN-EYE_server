@@ -6,7 +6,7 @@ from PIL import Image
 
 from fastapi import APIRouter, UploadFile
 from core.models.store import FoodModel
-from core.common.mongo2 import MongodbController
+from core.common.mongo import MongodbController
 from core.common.s3 import Storage
 from .src.util import Util
 
