@@ -1,20 +1,19 @@
 """
 food_router
 """
-import io
-from PIL import Image
+import os
 
 from fastapi import APIRouter, UploadFile
+from fastapi.responses import FileResponse
 from core.models.store import FoodModel
 from core.common.mongo import MongodbController
-from core.common.s3 import Storage
 from .src.util import Util
 
 food_router = APIRouter(prefix="/foods")
 
 PREFIX = 'api/v2/foods'
+IMAGES_DIR = '../images'
 DB = MongodbController('FIE_DB')
-storage = Storage('foodineye')
 
 @food_router.get("/hello")
 async def hello():
@@ -113,37 +112,6 @@ async def update_food(id:str, food:FoodModel):
             'message': f'ERROR {e}'
         }
 
-# @food_router.post('/food/image')
-# async def create_food_image(id: str, file: UploadFile):
-#     try:
-#         Util.check_id(id)
-#         file_content = await file.read()
-        
-#         # re-size 기능 고민
-#         if file.content_type not in ["image/jpeg", "image/jpg"]:
-#             with Image.open(io.BytesIO(file_content)) as im:
-#                 im = im.convert('RGB')
-#                 with io.BytesIO() as output:
-#                     im.save(output, format='JPEG')
-#                     file_content = output.getvalue()
-            
-#         image_key = storage.upload(file_content, form='jpg', path='images')
-        
-#         # image_key를 데이터베이스에 업데이트
-#         if DB.update_field_by_id('food', id, 'img_key', image_key):
-#             return {
-#                 'request':f'POST {PREFIX}/food/image?id={id}',
-#                 'status': 'OK',
-#                 'img_url': 'https://foodineye.s3.ap-northeast-2.amazonaws.com/' + image_key
-#             }
-        
-#     except Exception as e:
-#         print('ERROR', e)
-#         return {
-#             'request': f'POST {PREFIX}/food/image?id={id}',
-#             'status': 'ERROR',
-#             'message': f'ERROR {e}'
-#         }
 
 @food_router.put('/food/image')
 async def update_food_image(id: str, file: UploadFile):
@@ -153,31 +121,48 @@ async def update_food_image(id: str, file: UploadFile):
         current = DB.read_by_id('food', id)
 
         if current['img_key'] is not None:
-            storage.delete(current['img_key'])
+            os.remove(os.path.join(IMAGES_DIR, current['img_key']))
 
-        file_content = await file.read()
+        image = await file.read()
         
-        # re-size 기능 고민
-        if file.content_type not in ["image/jpeg", "image/jpg"]:
-            with Image.open(io.BytesIO(file_content)) as im:
-                im = im.convert('RGB')
-                with io.BytesIO() as output:
-                    im.save(output, format='JPEG')
-                    file_content = output.getvalue()
-            
-        image_key = storage.upload(file_content, form='jpg', path='images')
-        
+        image, image_key = Util.resize_image(image)
+
+        with open(os.path.join(IMAGES_DIR, image_key), "wb") as fp:
+            fp.write(image)
+
         if DB.update_field_by_id('food', id, 'img_key', image_key):
             return {
                 'request':f'PUT {PREFIX}/food/image?id={id}',
-                'status': 'OK',
-                'img_url': 'https://foodineye.s3.ap-northeast-2.amazonaws.com/' + image_key
+                'status': 'OK'
             }
         
     except Exception as e:
         print('ERROR', e)
         return {
             'request': f'PUT {PREFIX}/food/image?id={id}',
+            'status': 'ERROR',
+            'message': f'ERROR {e}'
+        }
+
+@food_router.get('/food/image')
+async def get_food_image(id:str):
+    try:
+        Util.check_id(id)
+
+        response = DB.read_by_id('food', id)
+
+        path = os.path.join(IMAGES_DIR, response['img_key'])
+
+        if os.path.isfile(path):
+            return FileResponse(path)
+        
+        else:
+            raise Exception(f'img key ERROR')
+        
+    except Exception as e:
+        print('ERROR', e)
+        return {
+            'request': f'GET {PREFIX}/food/image?id={id}',
             'status': 'ERROR',
             'message': f'ERROR {e}'
         }
