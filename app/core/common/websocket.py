@@ -97,8 +97,8 @@ class ConnectionManager:
     async def handle_message(self, websocket:WebSocket, s_id:str, h_id:str, data:json):
         """ client(web or app)으로부터 받은 msg에 따라 동작한다.
             - input : client, s_id, h_id, msg
-                - 'type' : 'update_state' -> web이 주문 상태 변경, 전송 결과를 web에게 출력
-                - 'type' : 'create_order' -> app이 주문 접수, 전송 결과를 app에게 출력
+                - 'type' : 'update_state' -> web이 주문 상태 변경, 전송 결과를 app에게 출력
+                - 'type' : 'create_order' -> app이 주문 접수, 전송 결과를 web에게 출력
                 - 'type' : 'connect' -> 연결 해지 또는 연결 확인
                 - 그외 : 입력받은 문자열 그대로 출력
             - return : X
