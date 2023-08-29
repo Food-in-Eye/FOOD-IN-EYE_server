@@ -242,3 +242,16 @@ async def get_refresh_token(u_id:str, payload: str = Depends(TokenManager.auth_r
         'R_Token': response
     }
     
+
+@user_router.get('/test/a_token')
+async def get_refresh_token(a_token: str = Depends(TokenManager.auth_a_token)):
+    return {
+        'request': f'GET {PREFIX}/test/a_token',
+        'a_token': a_token
+    }
+    
+@user_router.get('/test/r_token')
+async def get_refresh_token(r_token: str = Depends(TokenManager.auth_r_token)):
+    return {
+        'r_token': r_token
+    }
