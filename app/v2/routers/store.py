@@ -74,7 +74,7 @@ async def read_store(id:str):
 @store_router.post('/namecheck')
 async def check_duplicate_id(data:NameModel):
     try:
-        store = DB.read_one('store', {'name': data['name']})
+        store = DB.read_one('store', {'name': data.name})
 
         if store:
             state = 'unavailable'
