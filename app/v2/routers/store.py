@@ -72,22 +72,15 @@ async def read_store(id:str):
 
 
 @store_router.post('/namecheck')
-async def check_duplicate_id(data:NameModel):
+async def check_duplicate_name(data:NameModel):
     try:
         store = DB.read_one('store', {'name': data.name})
 
+        store = DB.read_one('store', {'name': data.name})
         if store:
             state = 'unavailable'
-        else:
-            state = 'available'
-
-    except Exception as e:
-        print('ERROR', e)
-        return {
-            'request': f'POST {PREFIX}/store/namecheck',
-            'status': 'ERROR',
-            'message': f'ERROR {e}'
-        }
+    except Exception:
+        state = 'available'
     
     return {
         'request': f'POST {PREFIX}/store/namecheck',
@@ -105,11 +98,13 @@ async def create_store(u_id:str, store:StoreModel):
     try:
         Util.check_id(u_id)
 
-        name_dup = DB.read_one('store', {'name':data['name']})
-        if name_dup:
+        name_data = NameModel(name=store.name)
+        state = await check_duplicate_name(name_data)
+        if state == 'unavailable':
             raise Exception(f'Request name has already exist.')
         
         store_list = DB.read_all('store')
+        
         if not store_list: # store 최초 등록
             data['num'] = 1
         else:
@@ -141,8 +136,9 @@ async def update_store(id:str, store: StoreModel):
     try:
         _id = Util.check_id(id)
 
-        name_dup = DB.read_one('store', {'name':data['name']})
-        if name_dup:
+        name_data = NameModel(name=store.name)
+        state = await check_duplicate_name(name_data)
+        if state == 'unavailable':
             raise Exception(f'Request name has already exist.')
         
         if DB.replace_one('store', {'_id':_id}, data):
