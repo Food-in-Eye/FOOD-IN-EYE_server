@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Request, HTTPException
 from core.models.store import StoreModel, NameModel
 from core.common.mongo import MongodbController
 from .src.util import Util
+from bson.objectid import ObjectId
 
 from core.common.authority import TokenManagement
 TokenManager = TokenManagement()
@@ -96,7 +97,7 @@ async def create_store(u_id:str, store:StoreModel):
     data['status'] = data['status'].value
 
     try:
-        Util.check_id(u_id)
+        u_id = Util.check_id(u_id)
 
         name_data = NameModel(name=store.name)
         state = await check_duplicate_name(name_data)
@@ -113,7 +114,7 @@ async def create_store(u_id:str, store:StoreModel):
 
         id = str(DB.insert_one('store', data))
         
-        DB.update_one('user', {'u_id':u_id}, {"s_id": id})
+        DB.update_one('user', {'_id':u_id}, {'s_id': id})
 
     except Exception as e:
         print('ERROR', e)
