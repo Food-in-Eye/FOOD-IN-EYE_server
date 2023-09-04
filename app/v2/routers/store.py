@@ -112,6 +112,8 @@ async def create_store(u_id:str, store:StoreModel):
             data['num'] = max_num + 1
 
         id = str(DB.insert_one('store', data))
+        
+        DB.update_one('user', {'u_id':u_id}, {"s_id": id})
 
     except Exception as e:
         print('ERROR', e)
