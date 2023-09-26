@@ -40,6 +40,13 @@ async def get_keys(key: str):
     except:
 
         return "ERROR"
+    
+from .routers.src.meta import Meta
+@v2_router.get("/test")
+async def get_meta():
+    
+    data = Meta.get_meta()
+    return Meta.get_detail(data['content'])
 
 # from datetime import datetime
 # from pytz import timezone
