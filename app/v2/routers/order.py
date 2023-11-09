@@ -279,8 +279,6 @@ async def preprocess_and_update(raw_data_key:str, h_id:str):
         
         DB.update_one('history', {'_id':_id}, {'fixation_path': fix_key, 'aoi_analysis': aoi_key})
 
-        update_new_history2(h_id)
-
 # async def update_exhibition(h_id:str):
 #     load_dotenv()
 #     async with httpx.AsyncClient() as client:
