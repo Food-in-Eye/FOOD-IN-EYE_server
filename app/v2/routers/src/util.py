@@ -1,5 +1,5 @@
 from bson.objectid import ObjectId
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 from core.error.exception import CustomException
 from core.common.mongo import MongodbController
@@ -28,24 +28,42 @@ class Util:
 
     @staticmethod
     def get_utc_time() -> datetime:
-        """ 현재 local 시간을 가져와 UTC timezone으로 리턴한다. """
+        """ 현재 시간을 가져와 UTC timezone으로 리턴한다. """
         date = datetime.now(pytz.timezone('Asia/Seoul'))
         utc_time = date.astimezone(pytz.utc)
         return utc_time
     
     @staticmethod
     def get_utc_time_by_datetime(date:datetime) -> datetime:
-        """ local 시간을 입력받아 UTC timezone으로 리턴한다. """
+        """ local 시간을 입력받아 UTC timezone으로 리턴한다. 
+            * 주의. mongoDB 쿼리 결과를 변환할 때 사용하면 안 됨 """
         # timestamp = datetime.strptime(date, '%Y-%m-%d')
         utc_time = date.astimezone(pytz.utc)
         return utc_time
     
     @staticmethod
+    def get_utc_time_by_str(date:str) -> datetime:
+        """ local 시간("%Y%m%d")을 입력받아 UTC timezone으로 리턴한다. 
+            * 주의. mongoDB 쿼리 결과를 변환할 때 사용 
+            ** 주의. 실행 방법(local, docker)에 따라 수정이 필요함 """
+        # local에서 실행할 때
+        # timestamp = datetime.strptime(date, '%Y-%m-%d')
+        # docker에서 실행할 때 
+        timestamp = datetime.strptime(date, '%Y-%m-%d') - timedelta(hours=9)
+
+        utc_time = timestamp.astimezone(pytz.utc)
+        return utc_time
+    
+    @staticmethod
     def get_local_time(date:datetime) -> datetime:
-        """ UTC 시간을 입력 받아 Asia/Seoul timezone으로 리턴한다. """
+        """ UTC 시간을 입력 받아 Asia/Seoul timezone으로 리턴한다. 
+            * 주의. 실행 방법(local, docker)에 따라 수정이 필요함 """
+        # local에서 실행할 때
+        # local_time = date.astimezone(pytz.timezone('Asia/Seoul')) + timedelta(hours=9)
+        # docker에서 실행할 때
         local_time = date.astimezone(pytz.timezone('Asia/Seoul'))
         return local_time
-    
+
 
     @staticmethod
     def delete_user_hid(h_id:str) -> bool:

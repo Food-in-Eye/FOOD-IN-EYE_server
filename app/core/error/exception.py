@@ -28,6 +28,9 @@ class APIException(Exception):
         403.72 : "Batch is out of range.",
 
         404.0 : "Not found",
+        # .1 : order_router/report ERROR
+        404.11 : "Report Not found about input date",
+        404.12 : "Report Not found about input id", 
 
         405.0 : "Method not allowed",
 

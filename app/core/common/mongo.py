@@ -42,6 +42,7 @@ class MongodbController:
         coll = self.get_collection(collection)
         
         result = coll.insert_one(data)
+
         if result.acknowledged is False:
             raise CustomException(503.53)
 
